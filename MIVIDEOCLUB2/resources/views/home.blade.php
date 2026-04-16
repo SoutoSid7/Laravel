@@ -1,4 +1,4 @@
 @extends('layouts.master')
-    @section('content')Pantalla Catalogo
+    @section('content')Pantalla Home
 @stop
 
