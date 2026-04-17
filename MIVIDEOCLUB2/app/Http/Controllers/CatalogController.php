@@ -173,7 +173,7 @@ class CatalogController extends Controller
 
     public function getIndex()
     {
-        return view('catalog.index');
+        return view('catalog.index')->with('arrayPeliculas', $this->arrayPeliculas);	
     }
 
     public function getShow($id)
