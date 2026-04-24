@@ -1,20 +1,20 @@
 @extends('layouts.master')
 @section('content')
 
-
 <div class="row">
-    @foreach( $arrayPeliculas as $key => $pelicula ) 
-    <!--Para cada película obtenemos su posición en
+    @foreach( $arrayPeliculas as $pelicula ) 
+        <!--Para cada película obtenemos su posición en
     el array y sus datos asociados, y generamos una 
     columna para mostrarlos-->
-    <div class="col-xs-6 col-sm-4 col-md-3 text-center"> <!--crea una fila-->
-        <a href="{{ url('/catalog/show/' . $key ) }}"> <!--$key → índice del array (identificador de la película)-->
-            <img src="{{$pelicula['poster']}}" style="height:200px"/>
+    <div class="col-xs-6 col-sm-4 col-md-3 text-center">
+        <a href="{{ url('/catalog/show/' . $pelicula->id) }}"><!--crea una fila-->
+            <img src="{{ $pelicula->poster }}" style="height:200px"/>
             <h4 style="min-height:45px;margin:5px 0 10px 0">
-                {{$pelicula['title']}}
+                {{ $pelicula->title }}
             </h4>
         </a>
-    </div> @endforeach
+    </div>
+    @endforeach
 </div>
 
 @endsection
