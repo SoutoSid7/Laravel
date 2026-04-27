@@ -4,26 +4,26 @@
     <div class="container">
         <h2>Editar Pelicula</h2>
 
-        <form action="{{ route('catalog.edit.{id}') }}" method="PUT"> <!-- Envia a la ruta de web -->
+        <form action="{{ url('catalog/edit/{id}') }}" method="PUT"> <!-- Envia a la ruta de web -->
             @csrf <!-- Obligatorio -->
             <div class="form-group">
                 <label for="title">Titulo:</label>
-                <input type="text" name="title" value=" {{$pelicula->title}} ">
+                <input type="text" name="title" value=" {{$pelicula->title}} " readonly>
             </div>
 
             <div class="form-group">
                 <label for="year">Año:</label>
-                <input type="number" name="year">                
+                <input type="text" name="year" value=" {{$pelicula->year}} ">
             </div>
 
             <div class="form-group">
                 <label for="director">Director:</label>
-                <input type="text" name="director">
+                <input type="text" name="director" value=" {{$pelicula->director}} ">
             </div>
 
             <div class="form-group">
                 <label for="poster">Poster:</label>
-                <input type="text" name="poster">
+                <input type="text" name="poster" value=" {{$pelicula->poster}} ">
             </div>
 
             <div class="form-group">
@@ -36,7 +36,7 @@
             
             <div class="form-group">
                 <label for="synopsis">Synopsis:</label>
-                <input type="textarea" name="synopsis"> 
+                <input type="textarea" name="synopsis" value=" {{$pelicula->synopsis}} "> 
             </div>
             <button type="submit">Guardar</button>
         </form>

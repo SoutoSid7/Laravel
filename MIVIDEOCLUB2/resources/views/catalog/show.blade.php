@@ -11,6 +11,12 @@
         <p><strong>Año:</strong>{{ $pelicula['year'] }}</p>
         <p><strong>Director:</strong>{{ $pelicula['director'] }}</p>
         <p><strong>Sinopsis:</strong>{{ $pelicula['synopsis'] }}</p>
+
+        {{-- Boton para editar la pelicula --}}
+        <a href="{{ url('/catalog/edit/' .$pelicula->id) }}" class="btn btn-warning mt-3">Editar Pelicula</a> 
+
+        {{-- Boton para volver atras --}}
+        <a href="{{ url('/catalog/') }}" class="btn btn-primary mt3">Volver al Listado</a>
     </div>
 </div>
 

@@ -4,7 +4,7 @@
     <div class="container">
         <h2>Crear Pelicula</h2>
 
-        <form action="{{ route('catalog.create') }}" method="POST"> <!-- Envia a la ruta de web -->
+        <form action="{{ url('catalog/create') }}" method="POST"> <!-- Envia a la ruta de web -->
             @csrf <!-- Obligatorio -->
             <div class="form-group">
                 <label for="title">Titulo:</label>
