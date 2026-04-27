@@ -39,6 +39,32 @@ class CatalogController extends Controller
 		));
 	}
 
+	public function putEdit(Request $request, $id)
+	{
+		$request->validate([
+			'title' => 'required',
+			'year' => 'required|integer',
+			'director' => 'required',
+			'poster' => 'nullable',
+			'rented' => 'required|boolean',
+			'synopsis' => 'required'
+		]);
+		$pelicula = Movie::findOrFail($id); // Busca en la base de datos una película con ese id
+
+		// Cambia los valores de la película por el valor que llega del formulario de los campos
+		$pelicula->year = $request->year;
+		$pelicula->director = $request->director;
+		$pelicula->poster = $request->poster;
+		$pelicula->rented = $request->rented;
+		$pelicula->synopsis = $request->synopsis;
+
+		// Guarda los campos en la bbdd
+		$pelicula->save();
+
+		// Redirigue 
+		return redirect('catalog/show/' . $id);
+	}
+
     public function getCreate()
     {
         return view('catalog.create');

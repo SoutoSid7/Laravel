@@ -4,8 +4,9 @@
     <div class="container">
         <h2>Editar Pelicula</h2>
 
-        <form action="{{ url('catalog/edit/{id}') }}" method="PUT"> <!-- Envia a la ruta de web -->
+        <form action="{{ url('catalog/edit/' . $pelicula->id) }}" method="POST"> <!-- Envia a la ruta de web -->
             @csrf <!-- Obligatorio -->
+            @method('PUT') 
             <div class="form-group">
                 <label for="title">Titulo:</label>
                 <input type="text" name="title" value=" {{$pelicula->title}} " readonly>
@@ -36,7 +37,7 @@
             
             <div class="form-group">
                 <label for="synopsis">Synopsis:</label>
-                <input type="textarea" name="synopsis" value=" {{$pelicula->synopsis}} "> 
+                <textarea name="synopsis">{{ $pelicula->synopsis }}</textarea>
             </div>
             <button type="submit">Guardar</button>
         </form>
