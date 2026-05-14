@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CalculadoraController;
-//Sesion
 use App\Http\Controllers\SesionController;
+use App\Http\Controllers\AhorcadoController;
 
 Route::get('/',           [CalculadoraController::class, 'index'])->name('calculadora');
 Route::post('/digito',    [CalculadoraController::class, 'digito'])->name('digito');
@@ -19,3 +19,8 @@ Route::get('/sesion',            [SesionController::class, 'index'])->name('cont
 Route::post('/sesion/increment', [SesionController::class, 'increment'])->name('contador.increment');
 Route::post('/sesion/decrement', [SesionController::class, 'decrement'])->name('contador.decrement');
 Route::post('/sesion/reset',     [SesionController::class, 'reset'])->name('contador.reset');
+
+//Ahorcado
+Route::get('/ahorcado', [AhorcadoController::class, 'index'])->name('ahorcado.index');
+Route::post('/ahorcado/letra', [AhorcadoController::class, 'probarLetra'])->name('ahorcado.letra');
+Route::post('/ahorcado/reiniciar', [AhorcadoController::class, 'reiniciar'])->name('ahorcado.reiniciar');
