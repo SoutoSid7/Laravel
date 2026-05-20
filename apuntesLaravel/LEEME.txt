@@ -1,0 +1,11 @@
+APUNTES LARAVEL - VERSION USB
+=============================
+
+1. Copia toda la carpeta 'usb-portable' al pendrive.
+2. En el ordenador de clase: doble clic en ABRIR.html
+3. Se abre en Chrome o Edge. No hace falta internet ni instalar nada.
+
+Si el navegador pregunta, permite abrir archivos locales.
+
+Archivo principal: ABRIR.html (doble clic)
+Alternativa: ABRIR.bat

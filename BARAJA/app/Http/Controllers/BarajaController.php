@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 class BarajaController extends Controller
 {
     private array $cartas = [
+        /**
+         *  Guarda las cartas cada carta tiene:
+         * 'numero' => 5
+         * 'imagen' => 5.png
+         * */ 
+
         ['numero' => 1, 'imagen' => '1.png'],
         ['numero' => 2, 'imagen' => '2.png'],
         ['numero' => 3, 'imagen' => '3.png'],
@@ -24,10 +30,12 @@ class BarajaController extends Controller
 
     public function index()
     {
-        if(!session()->has('numero_actual')){
+        if(!session()->has('numero_actual')){ // Ya hay una carta actual en la sesion?
+            // Si no existe
             $numero = array_rand($this->cartas);
             $carta = $this->cartas[$numero];
 
+            // Guardar en sesion 
             session([
                 'numero_actual' => $carta['numero'],
                 'imagen_actual' => $carta['imagen'],
@@ -41,11 +49,15 @@ class BarajaController extends Controller
 
     public function jugar(Request $request)
     {
+        // Recoge lo que pulsa
         $eleccion = $request->input('eleccion');
+        // Obtiene carta
         $numeroActual = session('numero_actual');
+        // Saca carta aleatoria
         $indice = array_rand($this->cartas);
         $nuevaCarta = $this->cartas[$indice];
 
+        // Comprobar que eligio
         $acierto = false;
 
         if($eleccion == 'mayor' && $nuevaCarta['numero'] > $numeroActual){
@@ -58,19 +70,24 @@ class BarajaController extends Controller
 
         $puntos = session('puntos');
 
+        // Si acierta se le suma puntos
         if($acierto){
             $puntos++;
         } else {
+            // Si falla vuelve a 0
             $puntos = 0;
         }
 
         session([
+            // La carta actual pasa a ser anterior
             'numero_anterior' => $numeroActual,
             'imagen_anterior' => session('imagen_actual'),
 
+            // Genera nuevas cartas
             'numero_actual' => $nuevaCarta['numero'],
             'imagen_actual' => $nuevaCarta['imagen'],
 
+            // Si tienes 5 puntos has ganado
             'puntos' => $puntos,
             'ganado' => $puntos >= 5
         ]);
@@ -80,6 +97,7 @@ class BarajaController extends Controller
 
     public function reiniciar()
     {
+        // Borra datos juego
         session()->forget([
             'numero_actual',
             'imagen_actual',

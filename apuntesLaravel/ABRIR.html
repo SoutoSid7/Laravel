@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apuntes Laravel completos - Examen</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    .content-area { overflow-y: auto; flex: 1; min-height: calc(100vh - 52px); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>Laravel Examen</h1>
+        <p>USB portable - sin instalar nada</p>
+      </div>
+      <input type="search" class="search-box" id="search" placeholder="Buscar tema..." autocomplete="off">
+      <ul class="nav-list" id="nav-list"></ul>
+      <div class="sidebar-footer">
+        <button type="button" class="btn-icon" id="theme-btn">Claro</button>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button type="button" class="menu-toggle" id="menu-toggle">Menu</button>
+        <h2 id="page-title">Inicio</h2>
+        <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+      </header>
+      <div class="content-area" id="content-area">
+
+<section id="page-inicio" class="page-section" data-title="Inicio">
+<article class="page-body">
+
+  <h1>Apuntes Laravel para el examen</h1>
+  <p class="lead">Guía interactiva ampliada para jueguitos sin base de datos: rutas, controlador, vista, sesión, errores, ejemplos y tu práctica de <strong>Mayor o Menor</strong>.</p>
+
+  <div class="badge-row"><span class="badge">Rutas</span><span class="badge">Controlador</span><span class="badge">Blade</span><span class="badge">Sesión</span><span class="badge">CSRF</span></div>
+
+  <div class="card exam">
+    <strong>Objetivo del examen típico:</strong> montar un mini-juego con GET (pantalla), POST (acción), sesión (estado) y opcional reinicio. Sin login ni BD.
+  </div>
+
+  <h2>Cómo usar esta guía</h2>
+  <ul>
+    <li>Menú izquierda → capítulos ordenados de setup a chuleta.</li>
+    <li><strong>Buscar</strong> filtra temas por nombre.</li>
+    <li>Barra superior → progreso de capítulos visitados.</li>
+    <li>Botones <strong>Copiar</strong> en bloques de código.</li>
+    <li>Tema claro/oscuro en el pie del menú.</li>
+  </ul>
+
+  <h2>Ruta de estudio recomendada (2–3 h)</h2>
+  <ol>
+    <li>Crear proyecto + estructura MVC</li>
+    <li>Rutas y controladores</li>
+    <li>Blade + formularios + CSRF</li>
+    <li>Sesión + redirect</li>
+    <li>Plantilla jueguito + <strong>5 enunciados práctica</strong></li>
+    <li>Chuleta + checklist</li>
+  </ol>
+
+  <h2>Tu proyecto de referencia</h2>
+  <table>
+    <tr><th>URL</th><th>Método</th><th>Función</th></tr>
+    <tr><td><code>/juego</code></td><td><span class="tag get">GET</span></td><td>Mostrar carta y racha</td></tr>
+    <tr><td><code>/juego</code></td><td><span class="tag post">POST</span></td><td>Procesar mayor/menor</td></tr>
+    <tr><td><code>/juego/reiniciar</code></td><td><span class="tag get">GET</span></td><td>Nueva partida</td></tr>
+  </table>
+
+  <div class="card tip">
+    Abre esta guía con XAMPP o <code>php artisan serve</code>:<br>
+    <code>http://localhost/juego-cartas/apuntes-examen/</code> o sirve desde la carpeta del proyecto.
+  </div>
+
+</article>
+
+</section>
+<section id="page-proyecto" class="page-section" data-title="Crear proyecto">
+<article class="page-body">
+
+  <h1>Crear proyecto Laravel</h1>
+  <p class="lead">Chuleta desde cero en Windows + XAMPP.</p>
+
+  <h2>Requisitos</h2>
+  <ul>
+    <li>PHP en PATH (<code>C:\xampp\php</code>)</li>
+    <li>Composer instalado</li>
+    <li>Extension <code>zip</code> activa en php.ini (acelera instalación)</li>
+  </ul>
+
+  <h2>Comandos</h2>
+  <div class="code-block"><pre>cd C:\xampp\htdocs
+composer create-project laravel/laravel nombre-proyecto
+cd nombre-proyecto
+php artisan key:generate
+php artisan serve</pre></div>
+
+  <p>URL: <strong>http://127.0.0.1:8000</strong></p>
+
+  <h2>Imágenes del enunciado</h2>
+  <div class="code-block"><pre>nombre-proyecto/public/cartas/1.png
+URL: http://127.0.0.1:8000/cartas/1.png</pre></div>
+
+  <h2>Orden de trabajo en el examen</h2>
+  <ol>
+    <li><code>php artisan make:controller JuegoController</code></li>
+    <li>Editar <code>routes/web.php</code></li>
+    <li>Métodos en el controlador</li>
+    <li>Vista <code>resources/views/juego.blade.php</code></li>
+    <li>Probar GET → POST → F5 → reinicio</li>
+  </ol>
+
+  <div class="card warn">
+    Si el examen dice <strong>sin base de datos</strong>: no uses migraciones, modelos ni <code>DB::</code>. Estado = <code>session()</code>.
+  </div>
+
+  <h2>Comandos útiles ese día</h2>
+  <div class="code-block"><pre>php artisan route:list      # Ver rutas registradas
+php artisan make:controller X
+php artisan config:clear</pre></div>
+
+</article>
+
+</section>
+<section id="page-estructura" class="page-section" data-title="Estructura y MVC">
+<article class="page-body">
+
+  <h1>Estructura del proyecto y MVC</h1>
+  <p class="lead">Dónde va cada cosa en un examen tipo jueguito.</p>
+
+  <h2>Carpetas clave</h2>
+  <table>
+    <tr><th>Ruta</th><th>Función</th></tr>
+    <tr><td><code>routes/web.php</code></td><td>Define URLs y métodos del controlador</td></tr>
+    <tr><td><code>app/Http/Controllers/</code></td><td>Lógica PHP del juego</td></tr>
+    <tr><td><code>resources/views/*.blade.php</code></td><td>Plantillas HTML</td></tr>
+    <tr><td><code>public/</code></td><td>Assets con URL directa (cartas, imágenes)</td></tr>
+  </table>
+
+  <h2>Flujo MVC</h2>
+  <div class="flow">
+    <span>Navegador</span><span class="arrow">→</span>
+    <span>Route</span><span class="arrow">→</span>
+    <span>Controller</span><span class="arrow">→</span>
+    <span>View</span><span class="arrow">→</span>
+    <span>HTML</span>
+  </div>
+
+  <div class="card exam">
+    <strong>Regla de oro:</strong> la vista NO decide si ganas o pierdes. La vista solo muestra variables.
+  </div>
+
+  <h2>GET vs POST en juegos</h2>
+  <table>
+    <tr><th>HTTP</th><th>Cuándo</th><th>Ejemplo</th></tr>
+    <tr><td><span class="tag get">GET</span></td><td>Pantalla</td><td>Ver carta y racha</td></tr>
+    <tr><td><span class="tag post">POST</span></td><td>Acción</td><td>Pulsar Mayor / Menor</td></tr>
+    <tr><td><span class="tag get">GET</span></td><td>Reinicio</td><td>/juego/reiniciar</td></tr>
+  </table>
+
+</article>
+
+</section>
+<section id="page-rutas" class="page-section" data-title="Rutas">
+<article class="page-body">
+
+  <h1>Rutas (web.php)</h1>
+  <p class="lead">Archivo: <code>routes/web.php</code> — la puerta de entrada de cada URL.</p>
+
+  <h2>Plantilla de examen (3 rutas)</h2>
+  <div class="code-block"><pre>&lt;?php
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JuegoController;
+
+Route::redirect('/', '/juego');
+
+Route::get('/juego', [JuegoController::class, 'cartasJuego'])
+    ->name('juego.cartasJuego');
+
+Route::post('/juego', [JuegoController::class, 'jugar'])
+    ->name('juego.jugar');
+
+Route::get('/juego/reiniciar', [JuegoController::class, 'reiniciar'])
+    ->name('juego.reiniciar');</pre></div>
+
+  <h2>Sintaxis imprescindible</h2>
+  <table>
+    <tr><th>Código</th><th>Significado</th></tr>
+    <tr><td><code>Route::get(...)</code></td><td>Solo mostrar / leer</td></tr>
+    <tr><td><code>Route::post(...)</code></td><td>Formulario que cambia estado</td></tr>
+    <tr><td><code>[Clase::class, 'metodo']</code></td><td>Qué método del controlador ejecutar</td></tr>
+    <tr><td><code>->name('juego.jugar')</code></td><td>Nombre para <code>route()</code> en Blade</td></tr>
+  </table>
+
+  <h2>Parámetros en URL (por si sale)</h2>
+  <div class="code-block"><pre>Route::get('/item/{id}', [Controller::class, 'show']);
+// public function show($id) { ... }</pre></div>
+
+  <div class="card tip">En jueguitos con sesión casi todo va en <code>session()</code>, no en la URL.</div>
+
+</article>
+
+</section>
+<section id="page-controladores" class="page-section" data-title="Controladores">
+<article class="page-body">
+
+  <h1>Controladores</h1>
+  <p class="lead">Crear: <code>php artisan make:controller JuegoController</code></p>
+
+  <h2>Devolver vista</h2>
+  <div class="code-block"><pre>return view('juego', [
+    'carta' => $carta,
+    'racha' => $racha,
+]);
+
+// Igual:
+return view('juego', compact('carta', 'racha'));</pre></div>
+  <p><code>juego</code> → archivo <code>resources/views/juego.blade.php</code></p>
+
+  <h2>Redirect</h2>
+  <div class="code-block"><pre>return redirect()->route('juego.cartasJuego');</pre></div>
+  <div class="card warn">No pases carta/racha en el redirect si el GET lee la sesión. Una sola fuente de verdad.</div>
+
+  <h2>Tres métodos típicos</h2>
+  <table>
+    <tr><th>Método</th><th>Ruta</th><th>Hace</th></tr>
+    <tr><td><code>cartasJuego()</code></td><td>GET</td><td>Inicializa sesión si falta, muestra vista</td></tr>
+    <tr><td><code>jugar()</code></td><td>POST</td><td>Lógica, actualiza sesión, redirect</td></tr>
+    <tr><td><code>reiniciar()</code></td><td>GET</td><td><code>session()->forget(...)</code>, redirect</td></tr>
+  </table>
+
+</article>
+
+</section>
+<section id="page-blade" class="page-section" data-title="Vistas Blade">
+<article class="page-body">
+
+  <h1>Vistas Blade</h1>
+  <p class="lead">Archivos <code>.blade.php</code> en <code>resources/views/</code></p>
+
+  <h2>Mostrar variables</h2>
+  <div class="code-block"><pre>{{ $carta }}
+{{ $racha }}</pre></div>
+  <p><code>{{ }}</code> escapa HTML (seguro por defecto).</p>
+
+  <h2>Condiciones</h2>
+  <div class="code-block"><pre>@if ($racha >= 5)
+    &lt;p&gt;¡Ganaste!&lt;/p&gt;
+@endif
+
+@if ($carta === 8 || $carta === 9)
+    ...
+@else
+    ...
+@endif</pre></div>
+  <div class="card warn">Cada <code>@if</code> necesita su <code>@endif</code>. Si no → ParseError unexpected end of file.</div>
+
+  <h2>Bucles</h2>
+  <div class="code-block"><pre>@foreach ($items as $item)
+    &lt;p&gt;{{ $item }}&lt;/p&gt;
+@endforeach</pre></div>
+
+  <h2>Ocultar formulario al ganar</h2>
+  <div class="code-block"><pre>@if ($racha &lt; 5)
+    &lt;form ...&gt;...&lt;/form&gt;
+@else
+    &lt;a href="{{ route('juego.reiniciar') }}"&gt;Jugar de nuevo&lt;/a&gt;
+@endif</pre></div>
+
+</article>
+
+</section>
+<section id="page-formularios" class="page-section" data-title="Formularios y CSRF">
+<article class="page-body">
+
+  <h1>Formularios y CSRF</h1>
+  <p class="lead">Toda acción de juego va en POST con token CSRF.</p>
+
+  <h2>Formulario mínimo</h2>
+  <div class="code-block"><pre>&lt;form method="POST" action="{{ route('juego.jugar') }}"&gt;
+    @csrf
+    &lt;button type="submit" name="jugada" value="1"&gt;Mayor&lt;/button&gt;
+    &lt;button type="submit" name="jugada" value="0"&gt;Menor&lt;/button&gt;
+&lt;/form&gt;</pre></div>
+
+  <table>
+    <tr><th>Parte</th><th>Por qué</th></tr>
+    <tr><td><code>method="POST"</code></td><td>Acción que modifica estado</td></tr>
+    <tr><td><code>action="{{ route(...) }}"</code></td><td>URL nombrada, no hardcodear</td></tr>
+    <tr><td><code>@csrf</code></td><td>Sin esto → error <strong>419</strong></td></tr>
+    <tr><td><code>name="jugada"</code></td><td>Clave en <code>$_POST['jugada']</code></td></tr>
+    <tr><td><code>value="1"</code></td><td>Valor enviado (string)</td></tr>
+  </table>
+
+  <h2>Input texto (otros juegos)</h2>
+  <div class="code-block"><pre>&lt;input type="number" name="apuesta" value="1"&gt;
+&lt;button type="submit"&gt;Jugar&lt;/button&gt;</pre></div>
+  <p>En controlador: <code>$apuesta = (int) $_POST['apuesta'];</code></p>
+
+</article>
+
+</section>
+<section id="page-sesion" class="page-section" data-title="Sesion">
+<article class="page-body">
+
+  <h1>Sesión — memoria del juego</h1>
+  <p class="lead">Sustituto de base de datos en el examen.</p>
+
+  <h2>Operaciones</h2>
+  <div class="code-block"><pre>// Escribir
+session(['carta' => 7, 'racha' => 2]);
+
+// Leer (con default)
+session('racha', 0);
+
+// ¿Existe?
+session()->has('carta');
+
+// Borrar (reiniciar)
+session()->forget(['carta', 'racha']);</pre></div>
+
+  <h2>Inicializar en GET</h2>
+  <div class="code-block"><pre>if (!session()->has('carta')) {
+    session([
+        'carta' => rand(1, 12),
+        'racha' => 0,
+    ]);
+}
+
+return view('juego', [
+    'carta' => session('carta'),
+    'racha' => session('racha'),
+]);</pre></div>
+
+  <h2>Claves típicas según juego</h2>
+  <table>
+    <tr><th>Clave</th><th>Ejemplo</th></tr>
+    <tr><td><code>carta</code>, <code>puntos</code>, <code>vidas</code></td><td>Estado actual</td></tr>
+    <tr><td><code>racha</code>, <code>nivel</code></td><td>Progreso</td></tr>
+    <tr><td><code>tablero</code></td><td>Array (memoria, 3 en raya)</td></tr>
+    <tr><td><code>mensaje</code></td><td>Feedback al jugador</td></tr>
+  </table>
+
+</article>
+
+</section>
+<section id="page-redirect" class="page-section" data-title="Redirect (PRG)">
+<article class="page-body">
+
+  <h1>Redirect — patrón POST-Redirect-GET</h1>
+  <p class="lead">Imprescindible: después de cada jugada POST, redirige al GET.</p>
+
+  <h2>Flujo correcto</h2>
+  <div class="flow">
+    <span>POST jugar</span><span class="arrow">→</span>
+    <span>session()</span><span class="arrow">→</span>
+    <span>redirect GET</span><span class="arrow">→</span>
+    <span>cartasJuego()</span><span class="arrow">→</span>
+    <span>view</span>
+  </div>
+
+  <div class="code-block"><pre>// Al final de jugar():
+return redirect()->route('juego.cartasJuego');</pre></div>
+
+  <h2>¿Por qué no return view() tras POST?</h2>
+  <div class="card warn">
+    Si devuelves la vista directamente tras POST, al pulsar <strong>F5</strong> el navegador puede <strong>repetir el POST</strong> (vuelve a jugar sin querer).
+  </div>
+
+  <h2>Orden en jugar() (memorizar)</h2>
+  <ol>
+    <li>Leer POST y sesión</li>
+    <li>Generar nuevo estado (carta nueva, etc.)</li>
+    <li>Comparar / calcular acierto</li>
+    <li>Actualizar racha</li>
+    <li><strong>Un solo</strong> <code>session([...])</code></li>
+    <li><code>return redirect()->route(...)</code></li>
+  </ol>
+
+</article>
+
+</section>
+<section id="page-assets" class="page-section" data-title="public/ y asset()">
+<article class="page-body">
+
+  <h1>public/ y asset()</h1>
+  <p class="lead">Imágenes de cartas, dados, fichas…</p>
+
+  <h2>Regla</h2>
+  <p>Todo en <code>public/</code> tiene URL directa:</p>
+  <p><code>public/cartas/3.png</code> → <code>http://127.0.0.1:8000/cartas/3.png</code></p>
+
+  <h2>En Blade</h2>
+  <div class="code-block"><pre>&lt;img src="{{ asset('cartas/' . $carta . '.png') }}" alt="Carta"&gt;
+
+@if ($carta === 8 || $carta === 9)
+    .jpg
+@else
+    .png
+@endif</pre></div>
+
+  <h2>Errores típicos</h2>
+  <table>
+    <tr><th>Error</th><th>Causa</th></tr>
+    <tr><td>Imagen rota</td><td><code>src="cartas/1.png"</code> sin <code>asset()</code></td></tr>
+    <tr><td>URL con <code>$carta</code> literal</td><td><code>'cartas/$carta.png'</code> comillas simples en PHP</td></tr>
+    <tr><td>404</td><td>Archivo no está en <code>public/cartas/</code></td></tr>
+  </table>
+
+  <div class="card tip">
+    <strong>Correcto:</strong> <code>asset('cartas/' . $carta . '.png')</code> o <code>asset("cartas/{$carta}.png")</code>
+  </div>
+
+</article>
+
+</section>
+<section id="page-plantilla" class="page-section" data-title="Plantilla jueguito">
+<article class="page-body">
+
+  <h1>Plantilla universal — jueguito</h1>
+  <p class="lead">Copia mental para cualquier enunciado.</p>
+
+  <h2>GET — mostrar</h2>
+  <div class="code-block"><pre>public function mostrar()
+{
+    if (!session()->has('estado')) {
+        session(['estado' => valorInicial(), 'puntos' => 0]);
+    }
+    return view('juego', [
+        'estado' => session('estado'),
+        'puntos' => session('puntos'),
+    ]);
+}</pre></div>
+
+  <h2>POST — jugar</h2>
+  <div class="code-block"><pre>public function jugar()
+{
+    if (!isset($_POST['accion'])) {
+        return redirect()->route('juego.mostrar');
+    }
+
+    $accion = (int) $_POST['accion'];
+    $estado = session('estado');
+    $puntos = session('puntos', 0);
+    $nuevoEstado = rand(1, 12); // según enunciado
+
+    $acierto = false; // tu lógica aquí
+
+    if ($acierto) {
+        $puntos = min($puntos + 1, 5);
+    } else {
+        $puntos = 0;
+    }
+
+    session(['estado' => $nuevoEstado, 'puntos' => $puntos]);
+    return redirect()->route('juego.mostrar');
+}</pre></div>
+
+  <h2>Mayor / menor (tu práctica)</h2>
+  <div class="code-block"><pre>$acierto = ($jugada === 1 && $cartaNueva > $cartaActual)
+        || ($jugada === 0 && $cartaNueva < $cartaActual);
+// Empate (==) → fallo → racha 0</pre></div>
+
+  <h2>GET — reiniciar</h2>
+  <div class="code-block"><pre>public function reiniciar()
+{
+    session()->forget(['carta', 'racha']);
+    return redirect()->route('juego.cartasJuego');
+}</pre></div>
+
+</article>
+
+</section>
+<section id="page-post" class="page-section" data-title="$_POST vs Request">
+<article class="page-body">
+
+  <h1>$_POST vs Request</h1>
+  <p class="lead">Los dos son válidos en examen.</p>
+
+  <table>
+    <tr><th></th><th><code>$_POST</code></th><th><code>Request</code></th></tr>
+    <tr><td>Estilo</td><td>PHP clásico</td><td>Laravel libro</td></tr>
+    <tr><td>Lectura</td><td><code>$_POST['jugada']</code></td><td><code>$request->input('jugada')</code></td></tr>
+    <tr><td>Firma método</td><td><code>jugar()</code></td><td><code>jugar(Request $request)</code></td></tr>
+  </table>
+
+  <h2>Tu estilo (recomendado si lo dominas)</h2>
+  <div class="code-block"><pre>$jugada = (int) $_POST['jugada'];</pre></div>
+
+  <h2>Estilo Laravel</h2>
+  <div class="code-block"><pre>use Illuminate\Http\Request;
+
+public function jugar(Request $request)
+{
+    $jugada = (int) $request->input('jugada');
+}</pre></div>
+
+  <div class="card warn">
+    <strong>Error común:</strong><br>
+    <code>(int) $_POST['jugada'];</code> sin asignar → no hace nada.<br>
+    <strong>Bien:</strong> <code>$jugada = (int) $_POST['jugada'];</code>
+  </div>
+
+  <p>Los <code>value</code> del HTML llegan como <strong>string</strong> <code>"1"</code> y <code>"0"</code>.</p>
+
+</article>
+
+</section>
+<section id="page-errores" class="page-section" data-title="Errores tipicos">
+<article class="page-body">
+
+  <h1>Errores típicos y soluciones</h1>
+
+  <table>
+    <tr><th>Error</th><th>Causa</th><th>Solución</th></tr>
+    <tr><td><strong>419 Page Expired</strong></td><td>Falta CSRF</td><td><code>@csrf</code> en el form</td></tr>
+    <tr><td><strong>404</strong></td><td>Ruta mal / sin name</td><td><code>php artisan route:list</code></td></tr>
+    <tr><td><strong>Undefined variable $carta</strong></td><td>No pasas a la vista</td><td><code>return view(..., ['carta'=>...])</code></td></tr>
+    <tr><td><strong>undefined method</strong></td><td>Ruta → método inexistente</td><td>Crear método o corregir nombre</td></tr>
+    <tr><td><strong>ParseError end of file</strong></td><td><code>@if</code> sin <code>@endif</code></td><td>Cerrar Blade</td></tr>
+    <tr><td>Imagen rota</td><td>Mal <code>asset()</code></td><td>Ver capítulo Assets</td></tr>
+    <tr><td>F5 repite jugada</td><td><code>return view</code> tras POST</td><td><code>redirect()</code></td></tr>
+    <tr><td>Racha no cambia</td><td>Comparación o sesión mal</td><td>Comparar antes de sobrescribir</td></tr>
+  </table>
+
+  <h2>Comando salvavidas</h2>
+  <div class="code-block"><pre>php artisan route:list</pre></div>
+  <p>Lista todas las rutas, métodos y nombres. Úsalo siempre antes de entregar.</p>
+
+</article>
+
+</section>
+<section id="page-adaptar" class="page-section" data-title="Adaptar enunciado">
+<article class="page-body">
+
+  <h1>Adaptar otro enunciado</h1>
+  <p class="lead">Antes de codear, rellena esta tabla.</p>
+
+  <table>
+    <tr><th>Pregunta</th><th>→</th></tr>
+    <tr><td>¿Qué se muestra?</td><td>Variables de la vista</td></tr>
+    <tr><td>¿Qué persiste?</td><td>Claves <code>session()</code></td></tr>
+    <tr><td>¿Cuántas acciones?</td><td>1 POST por acción (o varios botones, mismo POST)</td></tr>
+    <tr><td>¿Hay reinicio?</td><td>GET + <code>forget()</code></td></tr>
+    <tr><td>¿Victoria?</td><td><code>@if</code> + bloqueo en POST</td></tr>
+    <tr><td>¿Random?</td><td><code>rand()</code>, <code>array_rand()</code></td></tr>
+    <tr><td>¿Imágenes?</td><td><code>public/</code> + <code>asset()</code></td></tr>
+  </table>
+
+  <h2>Ejemplos rápidos</h2>
+  <table>
+    <tr><th>Juego</th><th>Sesión</th><th>POST</th></tr>
+    <tr><td>Mayor/menor</td><td>carta, racha</td><td>jugada</td></tr>
+    <tr><td>Adivina número</td><td>secreto, intentos</td><td>numero</td></tr>
+    <tr><td>Piedra papel tijera</td><td>puntos</td><td>opcion</td></tr>
+    <tr><td>Memoria</td><td>tablero (array)</td><td>carta_id</td></tr>
+    <tr><td>Dados</td><td>dado1, dado2</td><td>tirar</td></tr>
+  </table>
+
+</article>
+
+</section>
+<section id="page-ejercicios" class="page-section" data-title="5 enunciados practica">
+<article class="page-body">
+
+  <h1>5 enunciados tipo examen</h1>
+  <p class="lead">Practica antes de leer la solución. Todos son sin BD: rutas + controlador + vista + sesión.</p>
+
+  <div class="card exam">
+    <strong>Cómo entrenar:</strong> para cada enunciado anota en papel: (1) rutas GET/POST, (2) claves de sesión, (3) campos del formulario, (4) orden del método POST. Luego abre la solución y compara.
+  </div>
+
+  <!-- EJERCICIO 1 -->
+  <h2>1. Adivina el número</h2>
+  <div class="card">
+    <p>La aplicación genera un número secreto entre <strong>1 y 100</strong> al iniciar partida. El jugador envía un número por formulario. La app responde si es <strong>mayor</strong>, <strong>menor</strong> o <strong>correcto</strong>. Lleva contador de intentos. Al acertar muestra victoria y enlace para reiniciar. Sin BD.</p>
+    <p><strong>Requisitos técnicos:</strong> GET pantalla, POST adivinar, GET reiniciar. Máximo 10 intentos → derrota.</p>
+  </div>
+
+  <details>
+    <summary>Ver solución (rutas, sesión, lógica)</summary>
+    <div class="inner">
+      <h3>Rutas</h3>
+      <ul>
+        <li><span class="tag get">GET</span> <code>/adivina</code> → <code>mostrar()</code></li>
+        <li><span class="tag post">POST</span> <code>/adivina</code> → <code>comprobar()</code></li>
+        <li><span class="tag get">GET</span> <code>/adivina/reiniciar</code> → <code>reiniciar()</code></li>
+      </ul>
+      <h3>Sesión</h3>
+      <table>
+        <tr><th>Clave</th><th>Valor</th></tr>
+        <tr><td><code>secreto</code></td><td>rand(1, 100) al iniciar</td></tr>
+        <tr><td><code>intentos</code></td><td>contador, +1 cada POST</td></tr>
+        <tr><td><code>mensaje</code></td><td>"Mayor", "Menor", "Correcto", "Derrota"</td></tr>
+        <tr><td><code>terminado</code></td><td>true si ganó o perdió</td></tr>
+      </table>
+      <h3>Formulario</h3>
+      <p><code>&lt;input type="number" name="numero"&gt;</code> + submit. Ocultar form si <code>terminado</code>.</p>
+      <h3>POST (orden)</h3>
+      <ol>
+        <li>Si <code>terminado</code> → redirect sin procesar</li>
+        <li><code>$n = (int) $_POST['numero']</code></li>
+        <li>Comparar con <code>session('secreto')</code></li>
+        <li>Actualizar <code>mensaje</code>, <code>intentos++</code></li>
+        <li>Si intentos &gt;= 10 y no acertó → <code>terminado = true</code>, mensaje derrota</li>
+        <li>redirect GET</li>
+      </ol>
+    </div>
+  </details>
+
+  <!-- EJERCICIO 2 -->
+  <h2>2. Piedra, papel o tijera</h2>
+  <div class="card">
+    <p>El jugador elige piedra, papel o tijera (3 botones POST). La máquina elige al azar. Muestra ambas opciones y quién gana la ronda. Primero en llegar a <strong>3 puntos</strong> gana la partida. Reinicio borra puntos. Sin BD.</p>
+  </div>
+
+  <details>
+    <summary>Ver solución (rutas, sesión, lógica)</summary>
+    <div class="inner">
+      <h3>Rutas</h3>
+      <ul>
+        <li><span class="tag get">GET</span> <code>/ppt</code> → <code>index()</code></li>
+        <li><span class="tag post">POST</span> <code>/ppt</code> → <code>jugar()</code></li>
+        <li><span class="tag get">GET</span> <code>/ppt/reiniciar</code> → <code>reiniciar()</code></li>
+      </ul>
+      <h3>Sesión</h3>
+      <table>
+        <tr><th>Clave</th><th>Uso</th></tr>
+        <tr><td><code>puntos_jugador</code></td><td>0–3</td></tr>
+        <tr><td><code>puntos_maquina</code></td><td>0–3</td></tr>
+        <tr><td><code>ultima_jugada</code></td><td>piedra/papel/tijera (opcional, para vista)</td></tr>
+        <tr><td><code>ultima_maquina</code></td><td>idem</td></tr>
+        <tr><td><code>resultado_ronda</code></td><td>texto: "Ganas ronda", "Pierdes", "Empate"</td></tr>
+      </table>
+      <h3>Formulario</h3>
+      <p>Tres botones mismo <code>name="opcion"</code>: <code>value="piedra"</code>, <code>papel</code>, <code>tijera</code>.</p>
+      <h3>Lógica ronda</h3>
+      <p>Array de reglas o <code>if/elseif</code>: piedra gana tijera, tijera gana papel, papel gana piedra. Empate → mismos puntos.</p>
+      <p>Si <code>puntos_jugador &gt;= 3</code> → ocultar botones, mensaje victoria. Igual máquina.</p>
+    </div>
+  </details>
+
+  <!-- EJERCICIO 3 -->
+  <h2>3. Dados — suma 7 u 11</h2>
+  <div class="card">
+    <p>Al pulsar "Tirar", se generan dos dados (1–6). Se muestran imágenes o números y su suma. Si la suma es <strong>7 u 11</strong>, +1 punto (máximo 5). Si no, puntos a 0. Muestra <code>puntos/5</code>. Reiniciar partida. Sin BD.</p>
+  </div>
+
+  <details>
+    <summary>Ver solución (rutas, sesión, lógica)</summary>
+    <div class="inner">
+      <h3>Rutas</h3>
+      <ul>
+        <li><span class="tag get">GET</span> <code>/dados</code> → <code>mostrar()</code></li>
+        <li><span class="tag post">POST</span> <code>/dados</code> → <code>tirar()</code></li>
+        <li><span class="tag get">GET</span> <code>/dados/reiniciar</code> → <code>reiniciar()</code></li>
+      </ul>
+      <h3>Sesión</h3>
+      <table>
+        <tr><th>Clave</th><th>Uso</th></tr>
+        <tr><td><code>dado1</code>, <code>dado2</code></td><td>última tirada (mostrar en vista)</td></tr>
+        <tr><td><code>puntos</code></td><td>0–5</td></tr>
+      </table>
+      <h3>POST</h3>
+      <ol>
+        <li><code>$d1 = rand(1,6); $d2 = rand(1,6);</code></li>
+        <li><code>$suma = $d1 + $d2;</code></li>
+        <li>Si <code>$suma == 7 || $suma == 11</code> → <code>puntos = min(puntos+1, 5)</code></li>
+        <li>Sino → <code>puntos = 0</code></li>
+        <li>session + redirect</li>
+      </ol>
+      <p>Imágenes: <code>public/dados/1.png</code> … <code>asset('dados/'.$d1.'.png')</code></p>
+    </div>
+  </details>
+
+  <!-- EJERCICIO 4 -->
+  <h2>4. Par o impar (ruleta 1–12)</h2>
+  <div class="card">
+    <p>Como tu práctica de cartas pero más simple: se muestra un número del 1 al 12. El jugador apuesta <strong>par</strong> o <strong>impar</strong>. Se genera el siguiente número; si acierta, racha +1 (objetivo 5); si falla, racha 0. Sin imágenes obligatorias. Sin BD.</p>
+  </div>
+
+  <details>
+    <summary>Ver solución (casi igual a tu juego-cartas)</summary>
+    <div class="inner">
+      <h3>Sesión</h3>
+      <p><code>numero</code> (1–12), <code>racha</code> (0–5).</p>
+      <h3>POST</h3>
+      <pre style="background:var(--code-bg);padding:1rem;border-radius:8px;font-size:0.85rem;">$actual = session('numero');
+$nuevo = rand(1, 12);
+$jugada = (int) $_POST['apuesta']; // 1=par, 0=impar
+
+$esPar = ($nuevo % 2 === 0);
+$acierto = ($jugada === 1 && $esPar) || ($jugada === 0 && !$esPar);
+
+// actualizar racha, session, redirect</pre>
+      <p>Es el mismo esqueleto que <strong>mayor/menor</strong> cambiando solo la condición de acierto.</p>
+    </div>
+  </details>
+
+  <!-- EJERCICIO 5 -->
+  <h2>5. Memoria — 4 cartas boca abajo</h2>
+  <div class="card">
+    <p>Hay 4 cartas (valores 1–4, dos parejas: 1-1-2-2 o A,B,A,B). Se muestran boca abajo. El jugador hace clic en carta 1 y carta 2 (dos POST o un POST con id). Si coinciden, quedan descubiertas. Si no, se vuelven a ocultar. Gana al descubrir todas. Contador de intentos. Reinicio. Sin BD.</p>
+  </div>
+
+  <details>
+    <summary>Ver solución (rutas, sesión, lógica)</summary>
+    <div class="inner">
+      <h3>Rutas</h3>
+      <ul>
+        <li><span class="tag get">GET</span> <code>/memoria</code> → <code>tablero()</code></li>
+        <li><span class="tag post">POST</span> <code>/memoria/voltear</code> → <code>voltear()</code></li>
+        <li><span class="tag get">GET</span> <code>/memoria/reiniciar</code></li>
+      </ul>
+      <h3>Sesión (lo más importante)</h3>
+      <table>
+        <tr><th>Clave</th><th>Tipo</th><th>Ejemplo</th></tr>
+        <tr><td><code>cartas</code></td><td>array</td><td><code>[3, 1, 3, 1]</code> mezclado al iniciar</td></tr>
+        <tr><td><code>descubiertas</code></td><td>array índices</td><td><code>[0, 2]</code> ya acertadas</td></tr>
+        <tr><td><code>primera</code></td><td>int|null</td><td>índice primera carta clicada esta ronda</td></tr>
+        <tr><td><code>intentos</code></td><td>int</td><td>+1 cada par de clics</td></tr>
+      </table>
+      <h3>POST voltear</h3>
+      <ol>
+        <li><code>$id = (int) $_POST['carta'];</code> índice 0–3</li>
+        <li>Si ya está en <code>descubiertas</code> → redirect</li>
+        <li>Si <code>primera === null</code> → guardar <code>primera = $id</code></li>
+        <li>Si no → comparar <code>cartas[primera]</code> con <code>cartas[$id]</code></li>
+        <li>Si igual → añadir ambos a <code>descubiertas</code>; si no → solo mensaje "Fallaste" (en siguiente GET se resetea <code>primera</code>)</li>
+        <li><code>primera = null</code> tras segundo clic</li>
+        <li>Si <code>count(descubiertas) == 4</code> → victoria</li>
+      </ol>
+      <div class="card tip">
+        En examen corto pueden pedir solo 4 cartas fijas. Usa <code>@foreach</code> en Blade con 4 botones submit <code>name="carta" value="0"</code> … <code>3</code>.
+      </div>
+    </div>
+  </details>
+
+  <h2>Tabla resumen rápida</h2>
+  <table>
+    <tr><th>#</th><th>Juego</th><th>Claves sesión</th><th>POST</th></tr>
+    <tr><td>1</td><td>Adivina número</td><td>secreto, intentos, mensaje, terminado</td><td>numero</td></tr>
+    <tr><td>2</td><td>Piedra papel tijera</td><td>puntos_jugador, puntos_maquina, …</td><td>opcion</td></tr>
+    <tr><td>3</td><td>Dados 7/11</td><td>dado1, dado2, puntos</td><td>tirar (botón)</td></tr>
+    <tr><td>4</td><td>Par/impar</td><td>numero, racha</td><td>apuesta</td></tr>
+    <tr><td>5</td><td>Memoria 4 cartas</td><td>cartas[], descubiertas[], primera</td><td>carta (índice)</td></tr>
+  </table>
+
+
+</article>
+
+</section>
+
+<section id="page-explicacion-baraja" class="page-section" data-title="Baraja explicada">
+<article class="page-body">
+  <h1>Tu juego Baraja explicado línea por línea</h1>
+  <p class="lead">Esta sección conecta directamente con el código que me pasaste: rutas, controlador y Blade.</p>
+
+  <h2>Rutas reales de tu práctica</h2>
+  <table>
+    <tr><th>Ruta</th><th>Método HTTP</th><th>Método controlador</th><th>Nombre</th></tr>
+    <tr><td><code>/</code></td><td><span class="tag get">GET</span></td><td><code>index()</code></td><td><code>baraja.index</code></td></tr>
+    <tr><td><code>/jugar</code></td><td><span class="tag post">POST</span></td><td><code>jugar()</code></td><td><code>baraja.jugar</code></td></tr>
+    <tr><td><code>/reiniciar</code></td><td><span class="tag post">POST</span></td><td><code>reiniciar()</code></td><td><code>baraja.reiniciar</code></td></tr>
+  </table>
+
+  <div class="card exam"><strong>Idea clave:</strong> GET muestra la pantalla. POST modifica el juego. La sesión guarda la carta, puntos y victoria.</div>
+
+  <h2>Qué guarda la sesión</h2>
+  <table>
+    <tr><th>Clave</th><th>Qué significa</th><th>Ejemplo</th></tr>
+    <tr><td><code>numero_actual</code></td><td>Número de la carta que se ve ahora</td><td><code>7</code></td></tr>
+    <tr><td><code>imagen_actual</code></td><td>Imagen de la carta actual</td><td><code>7.png</code></td></tr>
+    <tr><td><code>numero_anterior</code></td><td>Número de la carta antes de jugar</td><td><code>3</code></td></tr>
+    <tr><td><code>imagen_anterior</code></td><td>Imagen de la carta anterior</td><td><code>3.png</code></td></tr>
+    <tr><td><code>puntos</code></td><td>Aciertos seguidos</td><td><code>4</code></td></tr>
+    <tr><td><code>ganado</code></td><td>Si llegó a 5 aciertos</td><td><code>true</code></td></tr>
+  </table>
+
+  <h2>index(): primera carga</h2>
+  <div class="code-block"><pre>public function index()
+{
+    if(!session()->has('numero_actual')){
+        $numero = array_rand($this->cartas);
+        $carta = $this->cartas[$numero];
+
+        session([
+            'numero_actual' => $carta['numero'],
+            'imagen_actual' => $carta['imagen'],
+            'puntos' => 0,
+            'ganado' => false
+        ]);
+    }
+
+    return view('baraja');
+}</pre></div>
+  <p>Si no existe carta en sesión, crea una carta aleatoria y empieza con 0 puntos. Si ya existe, no reinicia la partida.</p>
+
+  <h2>jugar(): la lógica importante</h2>
+  <ol>
+    <li>Lee el botón pulsado: <code>mayor</code> o <code>menor</code>.</li>
+    <li>Lee la carta actual desde sesión.</li>
+    <li>Saca una nueva carta aleatoria.</li>
+    <li>Compara la nueva carta con la anterior.</li>
+    <li>Si acierta, suma punto. Si falla, puntos a 0.</li>
+    <li>Guarda carta anterior, carta actual, puntos y si ganó.</li>
+    <li>Redirige a la pantalla principal.</li>
+  </ol>
+
+  <h2>Ejemplo mental</h2>
+  <div class="timeline">
+    <div><strong>1</strong><span>Carta actual: 4</span></div>
+    <div><strong>2</strong><span>Jugador pulsa Mayor</span></div>
+    <div><strong>3</strong><span>Nueva carta: 9</span></div>
+    <div><strong>4</strong><span>9 &gt; 4, acierta</span></div>
+    <div><strong>5</strong><span>Puntos +1</span></div>
+  </div>
+
+  <h2>Empate</h2>
+  <div class="card warn">Si la carta nueva es igual a la actual, no entra ni en mayor ni en menor. Por tanto, <code>$acierto</code> se queda en <code>false</code> y los puntos vuelven a 0.</div>
+</article>
+</section>
+
+<section id="page-codigo-completo" class="page-section" data-title="Código completo examen">
+<article class="page-body">
+  <h1>Código completo tipo examen</h1>
+  <p class="lead">Versión ordenada y fácil de memorizar del mismo juego Mayor o Menor.</p>
+
+  <h2>routes/web.php</h2>
+  <div class="code-block"><pre>&lt;?php
+
+use App\Http\Controllers\BarajaController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', [BarajaController::class, 'index'])
+    ->name('baraja.index');
+
+Route::post('/jugar', [BarajaController::class, 'jugar'])
+    ->name('baraja.jugar');
+
+Route::post('/reiniciar', [BarajaController::class, 'reiniciar'])
+    ->name('baraja.reiniciar');</pre></div>
+
+  <h2>Controlador con comentarios</h2>
+  <div class="code-block"><pre>&lt;?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class BarajaController extends Controller
+{
+    private array $cartas = [
+        ['numero' => 1, 'imagen' => '1.png'],
+        ['numero' => 2, 'imagen' => '2.png'],
+        ['numero' => 3, 'imagen' => '3.png'],
+        ['numero' => 4, 'imagen' => '4.png'],
+        ['numero' => 5, 'imagen' => '5.png'],
+        ['numero' => 6, 'imagen' => '6.png'],
+        ['numero' => 7, 'imagen' => '7.png'],
+        ['numero' => 8, 'imagen' => '8.png'],
+        ['numero' => 9, 'imagen' => '9.png'],
+        ['numero' => 10, 'imagen' => '10.png'],
+        ['numero' => 11, 'imagen' => '11.png'],
+        ['numero' => 12, 'imagen' => '12.png'],
+    ];
+
+    public function index()
+    {
+        if (!session()->has('numero_actual')) {
+            $carta = $this->cartas[array_rand($this->cartas)];
+
+            session([
+                'numero_actual' => $carta['numero'],
+                'imagen_actual' => $carta['imagen'],
+                'puntos' => 0,
+                'ganado' => false,
+                'mensaje' => 'Elige si la próxima carta será mayor o menor.',
+            ]);
+        }
+
+        return view('baraja');
+    }
+
+    public function jugar(Request $request)
+    {
+        if (session('ganado')) {
+            return redirect()->route('baraja.index');
+        }
+
+        $eleccion = $request->input('eleccion');
+        $numeroActual = session('numero_actual');
+        $nuevaCarta = $this->cartas[array_rand($this->cartas)];
+
+        $acierto = ($eleccion === 'mayor' && $nuevaCarta['numero'] &gt; $numeroActual)
+                || ($eleccion === 'menor' && $nuevaCarta['numero'] &lt; $numeroActual);
+
+        $puntos = $acierto ? session('puntos', 0) + 1 : 0;
+        $ganado = $puntos &gt;= 5;
+
+        session([
+            'numero_anterior' => $numeroActual,
+            'imagen_anterior' => session('imagen_actual'),
+            'numero_actual' => $nuevaCarta['numero'],
+            'imagen_actual' => $nuevaCarta['imagen'],
+            'puntos' => $puntos,
+            'ganado' => $ganado,
+            'mensaje' => $ganado ? '¡Has ganado!' : ($acierto ? 'Has acertado.' : 'Has fallado.'),
+        ]);
+
+        return redirect()->route('baraja.index');
+    }
+
+    public function reiniciar()
+    {
+        session()->forget([
+            'numero_actual', 'imagen_actual',
+            'numero_anterior', 'imagen_anterior',
+            'puntos', 'ganado', 'mensaje'
+        ]);
+
+        return redirect()->route('baraja.index');
+    }
+}</pre></div>
+
+  <h2>baraja.blade.php mínimo</h2>
+  <div class="code-block"><pre>&lt;h1&gt;Juego Mayor o Menor&lt;/h1&gt;
+
+@if(session('mensaje'))
+    &lt;p&gt;{{ session('mensaje') }}&lt;/p&gt;
+@endif
+
+@if(session('imagen_anterior'))
+    &lt;p&gt;Carta anterior:&lt;/p&gt;
+    &lt;img src="{{ asset('img/' . session('imagen_anterior')) }}" width="150"&gt;
+@endif
+
+&lt;p&gt;Carta actual:&lt;/p&gt;
+&lt;img src="{{ asset('img/' . session('imagen_actual')) }}" width="150"&gt;
+
+&lt;p&gt;Puntos: {{ session('puntos') }} / 5&lt;/p&gt;
+
+@if(!session('ganado'))
+    &lt;form action="{{ route('baraja.jugar') }}" method="POST"&gt;
+        @csrf
+        &lt;button type="submit" name="eleccion" value="mayor"&gt;Mayor&lt;/button&gt;
+        &lt;button type="submit" name="eleccion" value="menor"&gt;Menor&lt;/button&gt;
+    &lt;/form&gt;
+@endif
+
+&lt;form action="{{ route('baraja.reiniciar') }}" method="POST"&gt;
+    @csrf
+    &lt;button type="submit"&gt;Reiniciar&lt;/button&gt;
+&lt;/form&gt;</pre></div>
+</article>
+</section>
+
+<section id="page-preguntas-examen" class="page-section" data-title="Preguntas de examen">
+<article class="page-body">
+  <h1>Preguntas típicas de examen</h1>
+  <p class="lead">Respuestas cortas para defender el ejercicio si la profesora pregunta.</p>
+
+  <div class="qa-grid">
+    <div class="qa-card"><h3>¿Qué es una ruta?</h3><p>Es la URL que Laravel escucha. Une una dirección con un método del controlador.</p></div>
+    <div class="qa-card"><h3>¿Por qué POST para jugar?</h3><p>Porque jugar cambia el estado: carta, puntos y resultado.</p></div>
+    <div class="qa-card"><h3>¿Para qué sirve @csrf?</h3><p>Protege formularios POST. Sin él Laravel suele dar error 419.</p></div>
+    <div class="qa-card"><h3>¿Qué es session()?</h3><p>La memoria temporal del usuario. Guarda datos entre peticiones.</p></div>
+    <div class="qa-card"><h3>¿Qué hace array_rand?</h3><p>Devuelve una clave aleatoria del array. Luego se usa para obtener una carta.</p></div>
+    <div class="qa-card"><h3>¿Por qué redirect después del POST?</h3><p>Para evitar repetir la jugada al refrescar la página.</p></div>
+  </div>
+
+  <h2>Mini test</h2>
+  <div class="quiz" data-quiz>
+    <div class="quiz-question" data-answer="b">
+      <p><strong>1.</strong> ¿Dónde va la lógica principal del juego?</p>
+      <button data-option="a">En la vista Blade</button>
+      <button data-option="b">En el controlador</button>
+      <button data-option="c">En public/img</button>
+      <span class="quiz-result"></span>
+    </div>
+    <div class="quiz-question" data-answer="c">
+      <p><strong>2.</strong> ¿Qué error suele salir si falta @csrf?</p>
+      <button data-option="a">404</button>
+      <button data-option="b">500</button>
+      <button data-option="c">419</button>
+      <span class="quiz-result"></span>
+    </div>
+    <div class="quiz-question" data-answer="a">
+      <p><strong>3.</strong> ¿Qué función se usa para generar una carta aleatoria del array?</p>
+      <button data-option="a">array_rand()</button>
+      <button data-option="b">redirect()</button>
+      <button data-option="c">asset()</button>
+      <span class="quiz-result"></span>
+    </div>
+  </div>
+</article>
+</section>
+
+<section id="page-plantillas-rapidas" class="page-section" data-title="Plantillas rápidas">
+<article class="page-body">
+  <h1>Plantillas rápidas para copiar</h1>
+  <p class="lead">Trozos de código reutilizables para cualquier juego parecido.</p>
+
+  <h2>Inicializar sesión</h2>
+  <div class="code-block"><pre>if (!session()->has('puntos')) {
+    session([
+        'puntos' => 0,
+        'ganado' => false,
+        'mensaje' => 'Empieza la partida',
+    ]);
+}</pre></div>
+
+  <h2>Leer botón pulsado</h2>
+  <div class="code-block"><pre>public function jugar(Request $request)
+{
+    $opcion = $request->input('opcion');
+
+    // lógica...
+
+    return redirect()->route('juego.index');
+}</pre></div>
+
+  <h2>Varios botones en el mismo formulario</h2>
+  <div class="code-block"><pre>&lt;form method="POST" action="{{ route('juego.jugar') }}"&gt;
+    @csrf
+    &lt;button name="opcion" value="piedra"&gt;Piedra&lt;/button&gt;
+    &lt;button name="opcion" value="papel"&gt;Papel&lt;/button&gt;
+    &lt;button name="opcion" value="tijera"&gt;Tijera&lt;/button&gt;
+&lt;/form&gt;</pre></div>
+
+  <h2>Mostrar mensaje de sesión</h2>
+  <div class="code-block"><pre>@if(session('mensaje'))
+    &lt;div class="alerta"&gt;{{ session('mensaje') }}&lt;/div&gt;
+@endif</pre></div>
+</article>
+</section>
+
+<section id="page-chuleta" class="page-section" data-title="Chuleta 1 pagina">
+<article class="page-body">
+
+  <h1>Chuleta de 1 página</h1>
+  <p class="lead">Para repasar 10 minutos antes del examen.</p>
+
+  <div class="code-block"><pre>CREAR:
+  composer create-project laravel/laravel PROY
+  cd PROY → php artisan key:generate → php artisan serve
+  Imágenes → public/
+
+ARCHIVOS:
+  routes/web.php     → GET pantalla, POST jugar, GET reiniciar
+  Controllers/       → session + redirect
+  views/*.blade.php  → HTML + @csrf
+
+GET:
+  if (!session()->has('x')) session([...]);
+  return view('v', ['x' => session('x')]);
+
+POST:
+  leer $_POST + session → lógica → session([...]) → redirect()->route('get');
+
+VISTA:
+  {{ $var }}
+  &lt;form method="POST" action="{{ route('...') }}"&gt; @csrf
+  &lt;img src="{{ asset('carpeta/'.$f.'.png') }}"&gt;
+
+NO (sin BD):
+  Modelos, migrate, DB::</pre></div>
+
+  <h2>Tu proyecto</h2>
+  <table>
+    <tr><th>URL</th><th>Método</th></tr>
+    <tr><td>/juego</td><td>GET cartasJuego</td></tr>
+    <tr><td>/juego</td><td>POST jugar</td></tr>
+    <tr><td>/juego/reiniciar</td><td>GET reiniciar</td></tr>
+  </table>
+
+</article>
+
+</section>
+<section id="page-checklist" class="page-section" data-title="Checklist final">
+<article class="page-body">
+
+  <h1>Checklist antes de entregar</h1>
+  <p class="lead">Marca cada punto (se guarda en el navegador).</p>
+
+  <div class="card checklist" id="checklist">
+    <label><input type="checkbox" data-id="1"> Probado con php artisan serve o XAMPP</label>
+    <label><input type="checkbox" data-id="2"> php artisan route:list — rutas GET/POST correctas</label>
+    <label><input type="checkbox" data-id="3"> Formulario: POST + @csrf + route() en action</label>
+    <label><input type="checkbox" data-id="4"> Tras jugar: redirect (no return view)</label>
+    <label><input type="checkbox" data-id="5"> F5 después de jugar no repite POST</label>
+    <label><input type="checkbox" data-id="6"> Primera visita inicializa sesión</label>
+    <label><input type="checkbox" data-id="7"> Reinicio borra sesión</label>
+    <label><input type="checkbox" data-id="8"> Imágenes en public/ con asset()</label>
+    <label><input type="checkbox" data-id="9"> Sin BD si lo piden</label>
+    <label><input type="checkbox" data-id="10"> Sin errores 419 / 404 / undefined variable</label>
+  </div>
+
+  <div class="card tip" id="check-result" style="margin-top:1rem;display:none"></div>
+
+</article>
+
+</section>
+      </div>
+    </main>
+  </div>
+  <script>
+    const PAGES = [
+  { id: 'inicio', title: 'Inicio', section: 'General' },
+  { id: 'proyecto', title: 'Crear proyecto', section: 'Setup' },
+  { id: 'estructura', title: 'Estructura y MVC', section: 'Setup' },
+  { id: 'rutas', title: 'Rutas', section: 'Core' },
+  { id: 'controladores', title: 'Controladores', section: 'Core' },
+  { id: 'blade', title: 'Vistas Blade', section: 'Core' },
+  { id: 'formularios', title: 'Formularios y CSRF', section: 'Core' },
+  { id: 'sesion', title: 'Sesion', section: 'Juegos' },
+  { id: 'redirect', title: 'Redirect (PRG)', section: 'Juegos' },
+  { id: 'assets', title: 'public/ y asset()', section: 'Juegos' },
+  { id: 'plantilla', title: 'Plantilla jueguito', section: 'Juegos' },
+  { id: 'explicacion-baraja', title: 'Baraja explicada', section: 'Tu práctica' },
+  { id: 'codigo-completo', title: 'Código completo examen', section: 'Tu práctica' },
+  { id: 'preguntas-examen', title: 'Preguntas de examen', section: 'Tu práctica' },
+  { id: 'plantillas-rapidas', title: 'Plantillas rápidas', section: 'Tu práctica' },
+  { id: 'post', title: '$_POST vs Request', section: 'Extra' },
+  { id: 'errores', title: 'Errores tipicos', section: 'Extra' },
+  { id: 'adaptar', title: 'Adaptar enunciado', section: 'Extra' },
+  { id: 'ejercicios', title: '5 enunciados practica', section: 'Practica' },
+  { id: 'chuleta', title: 'Chuleta 1 pagina', section: 'Examen' },
+  { id: 'checklist', title: 'Checklist final', section: 'Examen' }
+    ];
+  </script>
+  <script src="js/app.js"></script>
+</body>
+</html>

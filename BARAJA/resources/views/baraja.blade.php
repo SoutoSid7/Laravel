@@ -9,20 +9,24 @@
 
     <h1>Juego Mayor o Menor</h1>
 
+    <!-- Mensaje si ha ganado -->
     @if(session('ganado'))
         <h2>¡Has ganado! 5 aciertos seguidos</h2>
     @endif
 
+    <!-- Si existe carta anterior la muestra -->
     @if(session('imagen_anterior'))
         <p>Carta anterior:</p>
         <img src="{{ asset('img/' . session('imagen_anterior')) }}" width="150">
     @endif
 
+    <!-- Muestra carta actual y Puntos -->
     <p>Carta actual:</p>
     <img src="{{ asset('img/' . session('imagen_actual')) }}" width="150">
 
     <p>Puntos: {{ session('puntos') }}</p>
 
+    <!-- SI todavia no gano muestra los botones -->
     @if(!session('ganado'))
         <form action="{{ route('baraja.jugar') }}" method="POST">
             @csrf
