@@ -1,0 +1,272 @@
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BuscaminasController;
+
+Route::get('/buscaminas', [BuscaminasController::class, 'index'])->name('buscaminas.index');
+Route::post('/buscaminas/revelar', [BuscaminasController::class, 'revelar'])->name('buscaminas.revelar');
+Route::post('/buscaminas/reiniciar', [BuscaminasController::class, 'reiniciar'])->name('buscaminas.reiniciar');
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class BuscaminasController extends Controller
+{
+    private int $filas = 8;
+    private int $columnas = 8;
+    private int $minas = 10;
+
+    public function index()
+    {
+        if (!session()->has('tablero')) {
+            $this->crearJuego();
+        }
+
+        return view('buscaminas', [
+            'tablero' => session('tablero'),
+            'reveladas' => session('reveladas'),
+            'estado' => session('estado', 'jugando'),
+        ]);
+    }
+
+    public function revelar(Request $request)
+    {
+        if (session('estado') !== 'jugando') {
+            return redirect()->route('buscaminas.index');
+        }
+
+        $fila = (int) $request->fila;
+        $columna = (int) $request->columna;
+
+        $tablero = session('tablero');
+        $reveladas = session('reveladas');
+
+        if ($tablero[$fila][$columna]['mina']) {
+            session(['estado' => 'perdiste']);
+        } else {
+            $this->revelarCelda($fila, $columna, $tablero, $reveladas);
+
+            if ($this->haGanado($tablero, $reveladas)) {
+                session(['estado' => 'ganaste']);
+            }
+        }
+
+        session(['reveladas' => $reveladas]);
+
+        return redirect()->route('buscaminas.index');
+    }
+
+    public function reiniciar()
+    {
+        session()->forget(['tablero', 'reveladas', 'estado']);
+        $this->crearJuego();
+
+        return redirect()->route('buscaminas.index');
+    }
+
+    private function crearJuego()
+    {
+        $tablero = [];
+        $reveladas = [];
+
+        for ($i = 0; $i < $this->filas; $i++) {
+            for ($j = 0; $j < $this->columnas; $j++) {
+                $tablero[$i][$j] = [
+                    'mina' => false,
+                    'numero' => 0,
+                ];
+
+                $reveladas[$i][$j] = false;
+            }
+        }
+
+        $minasColocadas = 0;
+
+        while ($minasColocadas < $this->minas) {
+            $fila = rand(0, $this->filas - 1);
+            $columna = rand(0, $this->columnas - 1);
+
+            if (!$tablero[$fila][$columna]['mina']) {
+                $tablero[$fila][$columna]['mina'] = true;
+                $minasColocadas++;
+            }
+        }
+
+        for ($i = 0; $i < $this->filas; $i++) {
+            for ($j = 0; $j < $this->columnas; $j++) {
+                if (!$tablero[$i][$j]['mina']) {
+                    $tablero[$i][$j]['numero'] = $this->contarMinasCercanas($i, $j, $tablero);
+                }
+            }
+        }
+
+        session([
+            'tablero' => $tablero,
+            'reveladas' => $reveladas,
+            'estado' => 'jugando',
+        ]);
+    }
+
+    private function contarMinasCercanas($fila, $columna, $tablero)
+    {
+        $contador = 0;
+
+        for ($i = -1; $i <= 1; $i++) {
+            for ($j = -1; $j <= 1; $j++) {
+                $nuevaFila = $fila + $i;
+                $nuevaColumna = $columna + $j;
+
+                if (
+                    isset($tablero[$nuevaFila][$nuevaColumna]) &&
+                    $tablero[$nuevaFila][$nuevaColumna]['mina']
+                ) {
+                    $contador++;
+                }
+            }
+        }
+
+        return $contador;
+    }
+
+    private function revelarCelda($fila, $columna, $tablero, &$reveladas)
+    {
+        if (!isset($tablero[$fila][$columna]) || $reveladas[$fila][$columna]) {
+            return;
+        }
+
+        $reveladas[$fila][$columna] = true;
+
+        if ($tablero[$fila][$columna]['numero'] === 0) {
+            for ($i = -1; $i <= 1; $i++) {
+                for ($j = -1; $j <= 1; $j++) {
+                    if ($i !== 0 || $j !== 0) {
+                        $this->revelarCelda($fila + $i, $columna + $j, $tablero, $reveladas);
+                    }
+                }
+            }
+        }
+    }
+
+    private function haGanado($tablero, $reveladas)
+    {
+        foreach ($tablero as $i => $fila) {
+            foreach ($fila as $j => $celda) {
+                if (!$celda['mina'] && !$reveladas[$i][$j]) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscaminas Laravel</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+        }
+
+        .tablero {
+            display: inline-grid;
+            grid-template-columns: repeat(8, 45px);
+            gap: 4px;
+            margin-top: 20px;
+        }
+
+        .celda {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 1px solid #777;
+            background: #bdbdbd;
+            cursor: pointer;
+        }
+
+        .revelada {
+            background: #e0e0e0;
+            cursor: default;
+        }
+
+        .mina {
+            background: #ff6b6b;
+        }
+
+        .mensaje {
+            font-size: 24px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .ganaste {
+            color: green;
+        }
+
+        .perdiste {
+            color: red;
+        }
+
+        .reiniciar {
+            margin-top: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Buscaminas en Laravel</h1>
+
+    @if ($estado === 'ganaste')
+        <div class="mensaje ganaste">¡Ganaste!</div>
+    @elseif ($estado === 'perdiste')
+        <div class="mensaje perdiste">¡Perdiste!</div>
+    @endif
+
+    <div class="tablero">
+        @foreach ($tablero as $i => $fila)
+            @foreach ($fila as $j => $celda)
+
+                @php
+                    $revelada = $reveladas[$i][$j];
+                    $mostrarTodo = $estado === 'perdiste' || $estado === 'ganaste';
+                @endphp
+
+                @if ($revelada || $mostrarTodo)
+                    <button class="celda revelada {{ $celda['mina'] ? 'mina' : '' }}" disabled>
+                        @if ($celda['mina'])
+                            💣
+                        @elseif ($celda['numero'] > 0)
+                            {{ $celda['numero'] }}
+                        @endif
+                    </button>
+                @else
+                    <form method="POST" action="{{ route('buscaminas.revelar') }}">
+                        @csrf
+                        <input type="hidden" name="fila" value="{{ $i }}">
+                        <input type="hidden" name="columna" value="{{ $j }}">
+                        <button class="celda" type="submit"></button>
+                    </form>
+                @endif
+
+            @endforeach
+        @endforeach
+    </div>
+
+    <form method="POST" action="{{ route('buscaminas.reiniciar') }}">
+        @csrf
+        <button class="reiniciar" type="submit">Reiniciar juego</button>
+    </form>
+
+</body>
+</html>
